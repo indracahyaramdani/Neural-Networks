@@ -389,7 +389,7 @@ class Optimizer_Adam:
         self.iterations += 1
 
 #common loss class
-class loss:
+class Loss:
 
     #regularization loss calculation
     def regularization_loss(self):
