@@ -34,7 +34,7 @@ class Layer_Dense:
         self.output = np.dot(inputs, self.weights) + self.biases
         
     #Backward pass
-    def backward(self, dvaLues):
+    def backward(self, dvalues):
         # Gradients on parameters
         self.dweights = np.dot(self.inputs.T, dvalues)
         self.dbiases = np.sum(dvalues, axis=0, keepdims=True)
@@ -46,15 +46,15 @@ class Layer_Dense:
             self.dweights += self.weight_regularizer_l1 * dL1
          # L2 on weights
         if self.weight_regularizer_l2 > 0:
-            self.dweights += 2 * self.weight_regularizer_l2 *\ self.weights
+            self.dweights += 2 * self.weight_regularizer_l2 * self.weights
         # L1 on biases
         if self.bias_regularizer_l1 > 0:
             dl1 = np.ones_like(self.biases)
             dl1[self.biases < 0] = -1
-            self.dbiases += self.bias_regularizer_l1 * dl1
+            self.dbiases += self.bias_regularizer_l1 * dL1
         # L2 on biases
         if self.bias_regularizer_l2 > 0:
-            self.dbiases += 2 * self.bias_regularizer_l2 *\ self.biases
+            self.dbiases += 2 * self.bias_regularizer_l2 * self.biases
         # Gradient on values 
         self.dinputs = np.dot(dvalues, self.weights.T)
     
@@ -147,11 +147,11 @@ class Activation_Softmax:
         self.dinputs = np.empty_like(dvalues)
 
         # Enumerate ouputs and gradients
-        for index, (single_output, single_dvalues) in \ enumerate(zip(self.output, dvaLues)):
+        for index, (single_output, single_dvalues) in  enumerate(zip(self.output, dvaLues)):
             # Flatten output array
             single_output = single_output.reshape(-1,1)
             # Calculate Jacobian matrix of the output and 
-            jacobian_matrix = np.diagflat(single_output) - \ np.dot(single_output, single_output.T)
+            jacobian_matrix = np.diagflat(single_output) -  np.dot(single_output, single_output.T)
             # Calculate sample wise gradient
             # and add it to the array of sample gradients
             self.dinputs[index] = np.dot(jacobian_matrix, single_dvalues)
@@ -212,7 +212,7 @@ class Optimizer_SGD:
     # Call once before any parameter updates
     def pre_update_params(self):
         if self.decay:
-            self.current_learning_rate = self.learning_rate * \ (1./(1.+ self.decay * self.iterations))
+            self.current_learning_rate = self.learning_rate *  (1./(1.+ self.decay * self.iterations))
 
     # update parameters
     def update_params(self, layer):
@@ -231,17 +231,17 @@ class Optimizer_SGD:
             # Build weight update with momentum -take previous
             # Update multiplied by retain factor and update with 
             # current gradients
-            weight_updates = \ self.momentum * layer.weight_momentums - \ self.current_learning_rate * layer.dweights
+            weight_updates =  self.momentum * layer.weight_momentums -  self.current_learning_rate * layer.dweights
             layer.weight_momentums = weight_updates
 
             #Build bias updates
-            bias_updates = \ self.momentum * layer.bias_momentums - \ self.current_learning_rate * layer.dbiases
+            bias_updates =  self.momentum * layer.bias_momentums -  self.current_learning_rate * layer.dbiases
             layer.bias_momentums = bias_updates
 
         # Vanilla SGD updates (as before momentum update)
         else :
-            weight_updates = - self.current_learning_rate * \ layer.dweights
-            bias_updates = - self.current_learning_rate * \ layer.dbiases
+            weight_updates = - self.current_learning_rate *  layer.dweights
+            bias_updates = - self.current_learning_rate *  layer.dbiases
 
         # Update weights and biases using either
         # vanilla or momentum updates
@@ -266,7 +266,7 @@ class Optimizer_Adagrad:
      # Call once before any parameter updates
     def pre_update_params(self):
         if self.decay:
-            self.current_learning_rate = self.learning_rate*\(1./(1. + self.decay * self.iterations))
+            self.current_learning_rate = self.learning_rate*(1./(1. + self.decay * self.iterations))
         
     # Update parameters
     def update_params(self, layer):
@@ -285,8 +285,8 @@ class Optimizer_Adagrad:
         
         # Vanilla SGD parameter update + normalization
         # with square rooted cache
-        layer.weights += -self.current_learning_rate * \ layer.dweights / \ (np.sqrt(layer.weights_cache) + self.epsilon)
-        layer.biases += -self.current_learning_rate * \ layer.dbiases / \ (np.sqrt(layer.bias_cache) + self.epsilon)
+        layer.weights += -self.current_learning_rate *  layer.dweights /  (np.sqrt(layer.weights_cache) + self.epsilon)
+        layer.biases += -self.current_learning_rate *  layer.dbiases /  (np.sqrt(layer.bias_cache) + self.epsilon)
 
     # Call once after any parameter updates
     def post_update_params(seLf):
@@ -307,7 +307,7 @@ class optimizer_RMSprop:
     # Call once before any parameter updates
     def pre_update_params(self):
         if self.decay:
-            self.current_learning_rate = self.learning_rate * \ (1. / (1. + self.decay * self.iterations))
+            self.current_learning_rate = self.learning_rate *  (1. / (1. + self.decay * self.iterations))
 
     # Update parameters
     def update_params(self, layer):
@@ -319,14 +319,14 @@ class optimizer_RMSprop:
             layer.bias_cache = np.zeros_like(layer.biases)
 
         # Update cache with squart current gradients
-        layer.weight_cache = self.rho * layer.weight_cache + \ (1 - self.rho) * layer.dweights**2
-        layer.bias_cache = self.rho * layer.bias_cache + \ (1 - self.rho) * layer.dbiases**2
+        layer.weight_cache = self.rho * layer.weight_cache +  (1 - self.rho) * layer.dweights**2
+        layer.bias_cache = self.rho * layer.bias_cache +  (1 - self.rho) * layer.dbiases**2
 
 
         #vanilla SGD parameter update + normalization
         # with square rooted cache
-        layer.weights += -self.current_learning_rate * \ layer.dweights / \ (np.sqrt(layer.weight_cache) + self.epsilon)
-        layer.biase += -self.current_learning_rate * \ layer.dbiases / \ (np.sqrt(layer.bias_cache) + self.epsilon)  
+        layer.weights += -self.current_learning_rate *  layer.dweights /  (np.sqrt(layer.weight_cache) + self.epsilon)
+        layer.biase += -self.current_learning_rate *  layer.dbiases / (np.sqrt(layer.bias_cache) + self.epsilon)  
 
     # Call once any parameter updates
     def post_update_params(self):
@@ -348,7 +348,7 @@ class Optimizer_Adam:
     #call once before any parameter updates
     def pre_update_params(self):
         if self.decay:
-            self.current.learning_rate = self.learning_rate * \ (1. / (1. + self.decay * self.iterations))
+            self.current.learning_rate = self.learning_rate *  (1. / (1. + self.decay * self.iterations))
      
     #update parameters
     def update_params(self,layer):
@@ -362,27 +362,27 @@ class Optimizer_Adam:
             layer.bias_cache = np.zeros_like(layer.biases)
         
         #update momentum with current gradients
-        layer.weight_momentums = self.beta_1 * \ layer.weight_momentums + \ (1-self.beta_1) * layer.dweights
-        layer.bias_momentums = self.beta_1 * \ layer.bias_momentums + \ (1-self.beta_1) * layer.dbiases
+        layer.weight_momentums = self.beta_1 *  layer.weight_momentums + (1-self.beta_1) * layer.dweights
+        layer.bias_momentums = self.beta_1 *  layer.bias_momentums +  (1-self.beta_1) * layer.dbiases
 
         #get corrected momentum
         #self.iteration is 0 at first pass
         #and we need to start with 1 here
-        weight_momentums_correted = layer.weight_momentums / \ (1 - self.beta_1 ** (self.iterations + 1))
-        bias_momentums_correted = layer.bias_momentums / \ (1 - self.beta_1 ** (self.iterations + 1))
+        weight_momentums_correted = layer.weight_momentums /  (1 - self.beta_1 ** (self.iterations + 1))
+        bias_momentums_correted = layer.bias_momentums /  (1 - self.beta_1 ** (self.iterations + 1))
 
         #update cache with squared current gradients
-        layer.weight_cache =  self.beta_2 * layer.weight_cache + \ (1 - self.beta_2) * layer.dweights**2
-        layer.weight_cache =  self.beta_2 * layer.bias_cache + \ (1 - self.beta_2) * layer.dbiases**2
+        layer.weight_cache =  self.beta_2 * layer.weight_cache +  (1 - self.beta_2) * layer.dweights**2
+        layer.weight_cache =  self.beta_2 * layer.bias_cache +  (1 - self.beta_2) * layer.dbiases**2
 
         #get corrected cache
-        weight_cache_corrected = layer.weight_cache / \ (1 - self.beta_2 ** (self.iterations + 1))
-        bias_cache_corrected = layer.bias_cache / \ (1 - self.beta_2 ** (self.iterations + 1))
+        weight_cache_corrected = layer.weight_cache /  (1 - self.beta_2 ** (self.iterations + 1))
+        bias_cache_corrected = layer.bias_cache /  (1 - self.beta_2 ** (self.iterations + 1))
 
         #vanilla SGD parameter update + normalization
         #with square rooted cache
-        layer.weights += -self.current_learning_rate * \ weight_momentums_corrected / \ (np.sqrt(weight_cache_corrected) + self.epsilon)
-        layer.biases += -self.current_learning_rate * \ bias.momentums_corrected / \ (np.sqrt(bias_cache_corrected) + self epsilon)
+        layer.weights += -self.current_learning_rate * weight_momentums_corrected /  (np.sqrt(weight_cache_corrected) + self.epsilon)
+        layer.biases += -self.current_learning_rate *  bias.momentums_corrected /  (np.sqrt(bias_cache_corrected) + self epsilon)
 
     #call once after any parameter updates
     def post_update_params(self):
@@ -404,20 +404,20 @@ class loss:
             #L1 regularization - weights
             #calculate only when factor greater than 0
             if layer.weight_regularizer_11 > 0:
-                regularization_loss += layer.weight_regularizer_11 * \ np.sum(np.abs(layer.weights))
+                regularization_loss += layer.weight_regularizer_11 *  np.sum(np.abs(layer.weights))
 
             #L2 regularization - weights
             if layer.weight_regularizer_12 > 0:
-                regularization_loss += layer.weight_regularizer_12 * \ np.sum(layer.weights * \ layer.weights)
+                regularization_loss += layer.weight_regularizer_12 *  np.sum(layer.weights *  layer.weights)
 
             #L1 regularization - biases
             #calculate only when factor greater than 0
             if layer.bias_regularizer_11 > 0:
-                regularization_loss += layer.bias_regularizer_11 * \ np.sum(np.abs(layer.biases))
+                regularization_loss += layer.bias_regularizer_11 *  np.sum(np.abs(layer.biases))
 
             #L2 regularization - biases
             if layer.bias_regularizer_12 > 0:
-                regularization_loss += layer.bias_regularizer_12 * \ np.sum(layer.biases * \ layer.biases)
+                regularization_loss += layer.bias_regularizer_12 *  np.sum(layer.biases * layer.biases)
 
         return regularization_loss
 
@@ -760,10 +760,10 @@ class Model:
         # create an object of combined activation
         # and loss function containing
         # faster gradient calculation
-        if isinstance(self.layers[-1], Activation_Softmax) and \ isinstance(self.loss, Loss_CtagoricalCrossentropy):
+        if isinstance(self.layers[-1], Activation_Softmax) and  isinstance(self.loss, Loss_CtagoricalCrossentropy):
             # Creat an object of combine activation
             # and loss functions
-            self.softmax_classifier_output = \ Activation_Softmax_Loss_CategoricalCrossentropy()
+            self.softmax_classifier_output =  Activation_Softmax_Loss_CategoricalCrossentropy()
 
     #Train the model
     def train(self, X, y, *, epochs=1, batch_size=None, print_everu=1, vaLidation_data=None):
@@ -814,7 +814,7 @@ class Model:
                 output = self.forward(batch_X, training=True)
 
                 #Calculate loss
-                data_loss, regularization_loss = \ self.loss.calculate(output, batch_y, include_reguLarization=True)
+                data_loss, regularization_loss =  self.loss.calculate(output, batch_y, include_reguLarization=True)
                 loss = data_loss + regularization_loss
 
                 # Get predictions and calculate an accuracy
@@ -840,7 +840,7 @@ class Model:
                           f'lr:{self.optimizer.current_learning_rate}')
     
         # Get and print epoch loss and accuracy
-        epoch_data_loss, epoch_regularization_loss = \ self.loss.calculate_accumulated(include_regularization=True)
+        epoch_data_loss, epoch_regularization_loss =  self.loss.calculate_accumulated(include_regularization=True)
         epoch_loss = epoch_data_loss + epoch_regularization_loss
         epoch_accuracy = self.accuracy.calculate_accumulated()
         
@@ -979,8 +979,7 @@ class Model:
             # which is Softmax activation
             # as we used combined activation/loss
             # object, let's set dinputs in this object
-            self.layers[-1].dinputs=\
-            self.softmax_classifier_output.dinputs
+            self.layers[-1].dinputs= self.softmax_classifier_output.dinputs
 
             # Call backward method going trough
             # all the object but last
