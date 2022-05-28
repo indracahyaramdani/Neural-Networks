@@ -10,6 +10,7 @@ import copy
 nnfs.init()
 
 
+
 #Dense layer
 class Layer_Dense:
  
@@ -24,6 +25,7 @@ class Layer_Dense:
         self.weight_regularizer_l2 = weight_regularizer_l2
         self.bias_regularizer_l1 = bias_regularizer_l1
         self.bias_regularizer_l2 = bias_regularizer_l2
+
     ##Forward pass
     def forward(self, inputs, training):
         #Remember input values
