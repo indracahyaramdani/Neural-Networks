@@ -15,7 +15,7 @@ nnfs.init()
 class Layer_Dense:
  
     #Layer initialization
-    def __init__(self, n_inputs, n_neurons, weight_regularizer_L1=0, weight_regularizer_L2=0, bias_regularizer_L1=0, bias_regularizer_L2=0):
+    def __init__(self, n_inputs, n_neurons, weight_regularizer_l1=0, weight_regularizer_l2=0, bias_regularizer_l1=0, bias_regularizer_l2=0):
 
         #Initialize weights and biases
         self.weights = 0.01 * np.random.randn(n_inputs, n_neurons)
@@ -41,8 +41,8 @@ class Layer_Dense:
         # Gradients on regularization
         # L1 on weights
         if self.weight_regularizer_l1 > 0:
-            dl1 = np.ones_like(self.weights)
-            dl1[self.weights < 0] = -1
+            dL1 = np.ones_like(self.weights)
+            dL1[self.weights < 0] = -1
             self.dweights += self.weight_regularizer_l1 * dL1
          # L2 on weights
         if self.weight_regularizer_l2 > 0:
@@ -147,7 +147,7 @@ class Activation_Softmax:
         self.dinputs = np.empty_like(dvalues)
 
         # Enumerate ouputs and gradients
-        for index, (single_output, single_dvalues) in  enumerate(zip(self.output, dvaLues)):
+        for index, (single_output, single_dvalues) in  enumerate(zip(self.output, dvalues)):
             # Flatten output array
             single_output = single_output.reshape(-1,1)
             # Calculate Jacobian matrix of the output and 
@@ -223,7 +223,7 @@ class Optimizer_SGD:
             # If layer does not contain momentum arrays, create them 
             # filled with zeros
             if not hasattr(layer, 'weight_momentums'):
-                 layer.weight_momentums = np.zeros_like(layer.weights)
+                layer.weight_momentums = np.zeros_like(layer.weights)
                 # If there is no momentum array for weight
                 # The array doesn't exist for biases yet either.
                 layer.bias_momentums = np.zeros_like(layer.biases)
@@ -289,7 +289,7 @@ class Optimizer_Adagrad:
         layer.biases += -self.current_learning_rate *  layer.dbiases /  (np.sqrt(layer.bias_cache) + self.epsilon)
 
     # Call once after any parameter updates
-    def post_update_params(seLf):
+    def post_update_params(self):
         self.iterations += 1
 
 #RMSprop optimizer
@@ -368,8 +368,8 @@ class Optimizer_Adam:
         #get corrected momentum
         #self.iteration is 0 at first pass
         #and we need to start with 1 here
-        weight_momentums_correted = layer.weight_momentums /  (1 - self.beta_1 ** (self.iterations + 1))
-        bias_momentums_correted = layer.bias_momentums /  (1 - self.beta_1 ** (self.iterations + 1))
+        weight_momentums_corrected = layer.weight_momentums /  (1 - self.beta_1 ** (self.iterations + 1))
+        bias_momentums_corrected = layer.bias_momentums /  (1 - self.beta_1 ** (self.iterations + 1))
 
         #update cache with squared current gradients
         layer.weight_cache =  self.beta_2 * layer.weight_cache +  (1 - self.beta_2) * layer.dweights**2
@@ -382,7 +382,7 @@ class Optimizer_Adam:
         #vanilla SGD parameter update + normalization
         #with square rooted cache
         layer.weights += -self.current_learning_rate * weight_momentums_corrected /  (np.sqrt(weight_cache_corrected) + self.epsilon)
-        layer.biases += -self.current_learning_rate *  bias.momentums_corrected /  (np.sqrt(bias_cache_corrected) + self epsilon)
+        layer.biases += -self.current_learning_rate *  bias_momentums_corrected /  (np.sqrt(bias_cache_corrected) + self.epsilon)
 
     #call once after any parameter updates
     def post_update_params(self):
@@ -422,12 +422,12 @@ class loss:
         return regularization_loss
 
     #set/remember trainable layers
-    def remember_trainable_layers(self, trainabLe_layers):
+    def remember_trainable_layers(self, trainable_layers):
         self.trainable_layers = trainable_layers
 
     #calculates the data and regularization losses
     #give model output and ground truth values
-    def calculate(self, output, y, *, incLude_regularization=false):
+    def calculate(self, output, y, *, include_regularization=False):
 
         #calculate sample losses
         sample_losses = self.forward(output, y)
@@ -440,14 +440,14 @@ class loss:
         self.accumulated_count += len(sample_losses)
 
         #if just data loss - return it
-        if not inclued_regularization:
+        if not include_regularization:
             return data_loss
 
         #return the data and regularization losses
         return data_loss, self.regularization_loss()
 
     #calculates accumulated loss
-    def calculate_accumulated(seLf, *, include_regularization=false):
+    def calculate_accumulated(self, *, include_regularization=False):
 
         #calculate mean loss
         data_loss = self.accumulated_sum / self.accumulated_count
@@ -515,7 +515,7 @@ class Loss_CategoricalCrossentropy(Loss):
 class Activation_Softmax_Loss_CategoricalCrossentropy():
 
     # Backward pass
-    def backward(seLf, dvalues, y_true):
+    def backward(self, dvalues, y_true):
 
         # Number of samples
         samples = len(dvalues)
@@ -582,7 +582,7 @@ class Loss_MeanSquaredError(Loss): #L2 loss
         return sample_losses
 
     # Backward pass
-    def backward(seLf, dvaLues, y_true):
+    def backward(self, dvalues, y_true):
 
         # Number of sample
         samples = len(dvalues)
@@ -607,7 +607,7 @@ class Loss_MeanAbsoluteError(Loss): #L1 loss
         return sample_losses
 
     # Backward pass
-    def backward(seLf, dvalues, y_true):
+    def backward(self, dvalues, y_true):
 
         # Number of samples
         samples = len(dvalues)
@@ -760,13 +760,13 @@ class Model:
         # create an object of combined activation
         # and loss function containing
         # faster gradient calculation
-        if isinstance(self.layers[-1], Activation_Softmax) and  isinstance(self.loss, Loss_CtagoricalCrossentropy):
+        if isinstance(self.layers[-1], Activation_Softmax) and  isinstance(self.loss, Loss_CategoricalCrossentropy):
             # Creat an object of combine activation
             # and loss functions
             self.softmax_classifier_output =  Activation_Softmax_Loss_CategoricalCrossentropy()
 
     #Train the model
-    def train(self, X, y, *, epochs=1, batch_size=None, print_everu=1, vaLidation_data=None):
+    def train(self, X, y, *, epochs=1, batch_size=None, print_every=1, validation_data=None):
 
         # Initialize accuracy object
         self.accuracy.init(y)
@@ -807,8 +807,8 @@ class Model:
         
                 # Otherwise slice a batch
                 else:
-                    batch_X = X[step*batch_size:(step+1)*batch_size]
-                    batch_y = y[step*batch_size:(step+1)*batch_size]
+                    batch_X = X[steps*batch_size:(steps+1)*batch_size]
+                    batch_y = y[steps*batch_size:(steps+1)*batch_size]
 
                 # Perform the forward pass
                 output = self.forward(batch_X, training=True)
@@ -831,8 +831,8 @@ class Model:
                 self.optimizer.post_update_params()
 
                 # Print a Summary
-                if not step % print_every or step == train_steps-1:
-                    print(f'step:{step} '+
+                if not steps % print_every or steps == train_steps-1:
+                    print(f'step:{steps} '+
                           f'acc: {accuracy:.3f}, ' +
                           f'loss : {loss:.3f} (' +
                           f'data_loss : {data_loss:.3f}, ' +
@@ -878,7 +878,7 @@ class Model:
         self.accuracy.new_pass()
 
         # Iterate over steps
-        for step in range(validition_steps):
+        for step in range(validation_steps):
 
             # If batch size is not set -
             # train using one step and full dataset
@@ -938,7 +938,7 @@ class Model:
 
             # Otherwise slice a batch
             else:
-                batch_X = x[step*batch_size:(step+1)*batch_size]
+                batch_X = X[steps*batch_size:(steps+1)*batch_size]
 
             # Perform the forward pass
             batch_output = self.forward(batch_X, training=False)
@@ -1025,7 +1025,7 @@ class Model:
         # Open a file in the binary write mode 
         # and save parameters into it 
         with open(path, 'wb') as f:
-            picle.dump(self.get_parameters(),f)
+            pickle.dump(self.get_parameters(),f)
     # Loads the weights and updates a model instance whit them
     def load_parameters(self, path):
 
