@@ -802,7 +802,6 @@ for epoch in range(1,epoch+1):
      # Itterae over steps
      for steps in range(train_steps):
 
-
          # If batch size is not set
          # train using one step and full dataset
          if batch_size is None:
