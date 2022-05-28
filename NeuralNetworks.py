@@ -1,13 +1,13 @@
 from audioop import ratecv
 from turtle import forward
 import numpy as np
-import nnfs
+#import nnfs
 import os
-import cv2
+#import cv2
 import pickle
 import copy
 
-nnfs.init()
+#nnfs.init()
 
 
 
