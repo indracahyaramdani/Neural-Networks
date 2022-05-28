@@ -1,3 +1,5 @@
+from audioop import ratecv
+from turtle import forward
 import numpy as np
 import nnfs
 import os
@@ -30,7 +32,7 @@ class Layer_Dense:
         self.output = np.dot(inputs, self.weights) + self.biases
         
     #Backward pass
-    def backward(self, dvalues):
+    def backward(self, dvaLues):
         # Gradients on parameters
         self.dweights = np.dot(self.inputs.T, dvalues)
         self.dbiases = np.sum(dvalues, axis=0, keepdims=True)
@@ -62,6 +64,113 @@ class Layer_Dense:
     def set_parameters(self, weights, biases):
         self.weights = weights
         self.biases = biases
+    
+    #Dropout
+    class Layer_Dropout :
+
+        # Init 
+        def __init__(self, rate):
+            #Store rate, we invert it as for example for dropout
+            # of 0.1 we need success rate of 0.9
+            self.rate = 1 - rate
+
+        # Forward pass
+        def forward(self, inputs, training):
+            # save input values
+            self.inputs = inputs
+            # If not in the training mode - return values
+            if not training:
+                self.output = inputs.copy()
+                return
+            # Generate and save scaled mask
+            self.binary_mask = np.random.binomial(1, self.rate, size=inputs.shape) / self.rate
+            # Apply mask to output values
+            self.output = inputs * self.binary_mask
+        
+        #Backward pass
+        def backward(self, dvaLues):
+            # Gradient on values
+            self.dinputs = dvalues * self.binary_mask
+
+    # Input "layer"
+    class Layer_Input:
+
+        # Forward pass
+        def forward(self, inputs, trainig):
+            self.output = inputs
+
+    # ReLU activation
+    class Activation_ReLU:
+
+        # Forward pass
+        def forward(self, inputs, training):
+            # Remember input values
+            self.inputs = inputs
+            # Calculate output values from inputs
+            self.output = np.maximum(0,inputs)
+        
+        # Backward pass 
+        def backward(self, dvaLues):
+            # Since we need to modify original variable,
+            # let's make a copy of values first
+            self.dinputs = dvalues.copy()
+
+            # Zero gradient where input values were negative
+            self.inputs[self.inputs <= 0] = 0
+
+        # Calculate predictions for outputs
+        def predictions(self, outputs):
+            return outputs
+
+    # Softmax activation 
+    class Activation_Softmax:
+
+        # Forward pass
+        def forward(self, inputs, training):
+            # Remember input values
+            self.inputs = inputs
+
+            # Get unnormalized prbabilities
+            exp_values = np.exp(inputs - np.max(inputs, axis=1, keepdims=True))
+        
+            #Normalize them for each sample
+            probabilities = exp_values / np.sum(exp_values, axis=1, keepdims=True)
+            self.output = probabilities
+
+        # Backward pass
+        def backward(self, dvaLues):
+
+            # Create uninitialized array
+            self.dinputs = np.empty_like(dvalues)
+
+            # Enumerate ouputs and gradients
+            for index, (single_output, single_dvalues) in \ enumerate(zip(self.output, dvaLues)):
+                # Flatten output array
+                single_output = single_output.reshape(-1,1)
+                # Calculate Jacobian matrix of the output and 
+                jacobian_matrix = np.diagflat(single_output) - \ np.dot(single_output, single_output.T)
+                # Calculate sample wise gradient
+                # and add it to the array of sample gradients
+                self.dinputs[index] = np.dot(jacobian_matrix, single_dvalues)
+    
+    # Calculate Predictions for outputs
+    def predictions(self, outputs):
+        return np.argmax(outputs, axis=1)
+
+    # Sigmoid activation
+    class Activation_Sigmoid:
+
+        # Forward pass
+        def forward(self, inputs, training):
+            # Save input and calculate/save output
+            # of the sigmoid function
+            self.inputs = inputs
+            self.output = 1/(1+np.exp(-inputs))
+
+        # Backward pass
+        
+
+
         
 
 
