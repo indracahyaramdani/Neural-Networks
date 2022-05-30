@@ -403,21 +403,21 @@ class Loss:
 
             #L1 regularization - weights
             #calculate only when factor greater than 0
-            if layer.weight_regularizer_11 > 0:
-                regularization_loss += layer.weight_regularizer_11 *  np.sum(np.abs(layer.weights))
+            if layer.weight_regularizer_l1 > 0:
+                regularization_loss += layer.weight_regularizer_l1 *  np.sum(np.abs(layer.weights))
 
             #L2 regularization - weights
-            if layer.weight_regularizer_12 > 0:
-                regularization_loss += layer.weight_regularizer_12 *  np.sum(layer.weights *  layer.weights)
+            if layer.weight_regularizer_l2 > 0:
+                regularization_loss += layer.weight_regularizer_l2 *  np.sum(layer.weights *  layer.weights)
 
             #L1 regularization - biases
             #calculate only when factor greater than 0
-            if layer.bias_regularizer_11 > 0:
-                regularization_loss += layer.bias_regularizer_11 *  np.sum(np.abs(layer.biases))
+            if layer.bias_regularizer_l1 > 0:
+                regularization_loss += layer.bias_regularizer_l1 *  np.sum(np.abs(layer.biases))
 
             #L2 regularization - biases
-            if layer.bias_regularizer_12 > 0:
-                regularization_loss += layer.bias_regularizer_12 *  np.sum(layer.biases * layer.biases)
+            if layer.bias_regularizer_l2 > 0:
+                regularization_loss += layer.bias_regularizer_l2 *  np.sum(layer.biases * layer.biases)
 
         return regularization_loss
 
@@ -786,7 +786,7 @@ class Model:
 # Indra 
 
         #Main taining loop
-        for epoch in range(1,epoch+1):
+        for epoch in range(1,epochs+1):
 
             #print epoch number
             print(f'epoch:{epoch}')
@@ -814,7 +814,7 @@ class Model:
                 output = self.forward(batch_X, training=True)
 
                 #Calculate loss
-                data_loss, regularization_loss =  self.loss.calculate(output, batch_y, include_reguLarization=True)
+                data_loss, regularization_loss =  self.loss.calculate(output, batch_y, include_regularization=True)
                 loss = data_loss + regularization_loss
 
                 # Get predictions and calculate an accuracy
@@ -833,35 +833,35 @@ class Model:
                 # Print a Summary
                 if not steps % print_every or steps == train_steps-1:
                     print(f'step:{steps} '+
-                          f'acc: {accuracy:.3f}, ' +
-                          f'loss : {loss:.3f} (' +
-                          f'data_loss : {data_loss:.3f}, ' +
-                          f'reg_loss : {regularization_loss:.3f}),' +
-                          f'lr:{self.optimizer.current_learning_rate}')
+                      f'acc: {accuracy:.3f}, ' +
+                      f'loss : {loss:.3f} (' +
+                      f'data_loss : {data_loss:.3f}, ' +
+                      f'reg_loss : {regularization_loss:.3f}),' +
+                      f'lr:{self.optimizer.current_learning_rate}')
     
-        # Get and print epoch loss and accuracy
-        epoch_data_loss, epoch_regularization_loss =  self.loss.calculate_accumulated(include_regularization=True)
-        epoch_loss = epoch_data_loss + epoch_regularization_loss
-        epoch_accuracy = self.accuracy.calculate_accumulated()
+            # Get and print epoch loss and accuracy
+            epoch_data_loss, epoch_regularization_loss =  self.loss.calculate_accumulated(include_regularization=True)
+            epoch_loss = epoch_data_loss + epoch_regularization_loss
+            epoch_accuracy = self.accuracy.calculate_accumulated()
         
-        print(f'training, ' +
+            print(f'training, ' +
               f'acc: {epoch_accuracy:.3f}, ' +
               f'loss: {epoch_loss:.3f}(' +
               f'data_loss : {epoch_data_loss:.3f},' +
               f'reg_loss : {epoch_regularization_loss:.3f}), '+
               f'lr : {self.optimizer.current_learning_rate}')
     
-        # If there is the validation data
-        if validation_data is not None:
+            # If there is the validation data
+            if validation_data is not None:
 
-            # Evaluate the model
-            self.evaluate(*validation_data,batch_size=batch_size)
+                # Evaluate the model
+                self.evaluate(*validation_data,batch_size=batch_size)
 
     # Evaluates the model using passed in dataset
     def evaluate(self,X_val,y_val,*, batch_size=None):
 
         # Default value if batch size is not being set 
-        valdation_steps =1
+        validation_steps = 1
 
         # Calculate number of steps
         if batch_size is not None:
