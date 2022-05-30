@@ -786,7 +786,7 @@ class Model:
 # Indra 
 
         #Main taining loop
-        for epoch in range(1,epochs+1):
+        for epoch in range(1, epochs+1):
 
             #print epoch number
             print(f'epoch:{epoch}')
@@ -814,7 +814,8 @@ class Model:
                 output = self.forward(batch_X, training=True)
 
                 #Calculate loss
-                data_loss, regularization_loss =  self.loss.calculate(output, batch_y, include_regularization=True)
+                data_loss, regularization_loss = \
+                    self.loss.calculate(output, batch_y, include_regularization=True)
                 loss = data_loss + regularization_loss
 
                 # Get predictions and calculate an accuracy
