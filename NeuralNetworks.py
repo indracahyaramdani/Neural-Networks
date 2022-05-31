@@ -348,7 +348,7 @@ class Optimizer_Adam:
     #call once before any parameter updates
     def pre_update_params(self):
         if self.decay:
-            self.current.learning_rate = self.learning_rate *  (1. / (1. + self.decay * self.iterations))
+            self.current_learning_rate = self.learning_rate *  (1. / (1. + self.decay * self.iterations))
      
     #update parameters
     def update_params(self,layer):
