@@ -819,7 +819,7 @@ class Model:
 
                 # Get predictions and calculate an accuracy
                 predictions = self.output_layer_activation.predictions(output)
-                accuracy = self.accuracy.calcualte(predictions,batch_y)
+                accuracy = self.accuracy.calculate(predictions,batch_y)
 
                 # Perform backward pass
                 self.backward(output,batch_y)
