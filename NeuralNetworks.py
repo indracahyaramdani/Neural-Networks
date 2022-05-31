@@ -797,7 +797,7 @@ class Model:
             self.accuracy.new_pass()
 
             # Itterae over steps
-            for steps in range(train_steps):
+            for step in range(train_steps):
 
                 # If batch size is not set
                 # train using one step and full dataset
@@ -807,15 +807,14 @@ class Model:
         
                 # Otherwise slice a batch
                 else:
-                    batch_X = X[steps*batch_size:(steps+1)*batch_size]
-                    batch_y = y[steps*batch_size:(steps+1)*batch_size]
+                    batch_X = X[step*batch_size:(step+1)*batch_size]
+                    batch_y = y[step*batch_size:(step+1)*batch_size]
 
                 # Perform the forward pass
                 output = self.forward(batch_X, training=True)
 
                 #Calculate loss
-                data_loss, regularization_loss = \
-                    self.loss.calculate(output, batch_y, include_regularization=True)
+                data_loss, regularization_loss = self.loss.calculate(output, batch_y, include_regularization=True)
                 loss = data_loss + regularization_loss
 
                 # Get predictions and calculate an accuracy
@@ -832,8 +831,8 @@ class Model:
                 self.optimizer.post_update_params()
 
                 # Print a Summary
-                if not steps % print_every or steps == train_steps-1:
-                    print(f'step:{steps} '+
+                if not step % print_every or step == train_steps-1:
+                    print(f'step:{step} '+
                       f'acc: {accuracy:.3f}, ' +
                       f'loss : {loss:.3f} (' +
                       f'data_loss : {data_loss:.3f}, ' +
@@ -866,7 +865,7 @@ class Model:
 
         # Calculate number of steps
         if batch_size is not None:
-            validation_steps=len(X_val)//batch_size
+            validation_steps = len(X_val)//batch_size
             # Dividing round down, If there are some rmaining
             # data but not a full batch, this won't include it 
             # Add '1' to include this not full batch 
@@ -930,7 +929,7 @@ class Model:
         output = []
 
         # Itterate over steps
-        for steps in range(prediction_steps):
+        for step in range(prediction_steps):
 
             # If batch size is not set
             # train using one step and full dataset
@@ -939,7 +938,7 @@ class Model:
 
             # Otherwise slice a batch
             else:
-                batch_X = X[steps*batch_size:(steps+1)*batch_size]
+                batch_X = X[step*batch_size:(step+1)*batch_size]
 
             # Perform the forward pass
             batch_output = self.forward(batch_X, training=False)
@@ -1048,7 +1047,7 @@ class Model:
         # Remove data from the input layer
         # and gradients form the loss object
         model.input_layer.__dict__.pop('output',None)
-        model.loss.__dict.pop('dinputs',None)
+        model.loss.__dict__.pop('dinputs',None)
 
         # For each layer remove inputs, output, and dinputs properties
         for layer in model.layers:
