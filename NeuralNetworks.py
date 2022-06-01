@@ -1,3 +1,5 @@
+from random import sample
+from turtle import forward
 import numpy as np
 #import nnfs
 import os
@@ -5,9 +7,8 @@ import os
 import pickle
 import copy
 
+
 #nnfs.init()
-
-
 
 #Dense layer
 class Layer_Dense:
@@ -588,10 +589,12 @@ class Loss_MeanSquaredError(Loss): #L2 loss
         # We'll use the first sample to count them
         outputs = len(dvalues[0])
 
+
         # Gradient on values
         self.dinputs = -2 * (y_true - dvalues) / outputs
         # Normalize gradient
         self.dinputs = self.dinputs / samples
+
 
 # Mean Absolute Error loss
 class Loss_MeanAbsoluteError(Loss): #L1 loss
