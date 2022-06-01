@@ -1,3 +1,5 @@
+from random import sample
+from turtle import forward
 import numpy as np
 #import nnfs
 import os
@@ -5,9 +7,8 @@ import os
 import pickle
 import copy
 
+
 #nnfs.init()
-
-
 
 #Dense layer
 class Layer_Dense:
