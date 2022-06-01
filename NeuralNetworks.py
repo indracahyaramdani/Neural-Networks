@@ -1,5 +1,3 @@
-from audioop import ratecv
-from turtle import forward
 import numpy as np
 #import nnfs
 import os
@@ -692,10 +690,6 @@ class Model:
         self.layers = []
         # Softmax classifier's object
         self.softmax_classifier_output = None
-
-    # Add object to the model
-    def add(self, layer):
-        self.layers.append(layer)
 
     # Set loss, optimizer and accuracy
     def set(self, *, loss=None, optimizer=None, accuracy=None):
